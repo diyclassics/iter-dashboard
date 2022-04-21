@@ -1,9 +1,10 @@
-from time import time
+# Imports
 from numpy import count_nonzero
 import streamlit as st
 import altair as alt
 import pandas as pd
 
+# Streamlit app
 st.set_page_config(layout="wide")
 
 st.header('ITER Dashboard')
@@ -37,9 +38,9 @@ if queries:
 
     if normalize:
         df = df.apply(lambda x: x / totals['total'] * 1000)
-    else:
-        pass
-    df = df[df[queries] != 0][queries].dropna()
+
+    df = df[queries]
+    df = df.loc[~(df==0).all(axis=1)]
 
     df = df.join(dates).dropna()
     df = df[(df['dates'] >= slider_range[0]) & (df['dates'] <= slider_range[1])]

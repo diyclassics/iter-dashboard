@@ -24,7 +24,8 @@ df = pd.DataFrame(totals, columns=['total'], index=T.fileids())
 df.to_csv('data/output/totals.tsv', sep='\t')
 
 # Vectorize
-vectorizer = CountVectorizer(vocabulary=['pater', 'mater', 'filius', 'filia'])
+vocabulary = ['pater', 'mater', 'filius', 'filia']
+vectorizer = CountVectorizer(vocabulary=vocabulary)
 X = vectorizer.fit_transform(docs)
 vocab = vectorizer.get_feature_names_out()
 dtm = X.toarray()
