@@ -3,9 +3,13 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from cltkreaders.lat import LatinTesseraeCorpusReader
 from latintools import preprocess
+import pickle
 
 # Define vocabulary
-vocabulary = ['pater', 'mater', 'filius', 'filia', 'auunculus', 'patruus']
+# vocabulary = ['pater', 'mater', 'filius', 'filia', 'auunculus', 'patruus']
+term_data = pickle.load(open('data/output/kinship_terms.p', 'rb'))
+terms, genders = zip(*term_data.items())
+terms = [preprocess(term) for term in terms]
 
 # Get corpus
 T = LatinTesseraeCorpusReader()
@@ -30,7 +34,7 @@ df = pd.DataFrame(totals, columns=['total'], index=T.fileids())
 df.to_csv('data/output/totals.tsv', sep='\t')
 
 # Vectorize
-vectorizer = CountVectorizer(vocabulary=vocabulary)
+vectorizer = CountVectorizer(vocabulary=terms)
 X = vectorizer.fit_transform(docs)
 vocab = vectorizer.get_feature_names_out()
 dtm = X.toarray()
