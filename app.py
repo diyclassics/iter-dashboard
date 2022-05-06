@@ -10,7 +10,7 @@ from sklearn.manifold import TSNE
 import plotly
 import plotly.graph_objs as go
 
-top_n = 20
+top_n = 5
 
 # @st.cache 
 def append_list(sim_words, words):
@@ -132,9 +132,10 @@ query_terms = tuple(query_terms)
 
 st.sidebar.header('Parameters')
 
+search = st.sidebar.text_input('Limit texts', '')
 queries = st.sidebar.multiselect(
     'Select words',
-    query_terms, default='mater'
+    query_terms, default=('ab', 'ad')
 )
 
 if queries:
@@ -168,8 +169,15 @@ if queries:
         slider_range = st.sidebar.slider('Date Range', min_value=slider_min, max_value=slider_max, value=(slider_min, slider_max))
         valid_slider = True
         empty_df = False
-        # slider_min, slider_max = slider_range
-        slider_min_state, slider_max_state = (slider_min, slider_max)
+        slider_min, slider_max = slider_range
+        # slider_min_state, slider_max_state = (slider_min, slider_max)
+        print(search)
+        if len(search) > 0:
+            # df = df[df.index.to_series().str.contains(search)]
+            df['search'] = df.index
+            df['search'] = df['search'].apply(lambda x: x.lower())
+            df = df[df['search'].str.contains(search.lower())]
+            df.pop('search')
         df = df[(df['date'] >= slider_min) & (df['date'] <= slider_max)]
 
         if len(df) < 1:
@@ -189,7 +197,6 @@ if queries:
         if not empty_df:
             date_query_avgs = {query: sum(df[query])/len(df[query]) for query in queries}        
         date_query_inc = {query: count_nonzero(df[query]) for query in queries}
-        # date_num_texts = len(df)
         
         if valid_slider:
             if normalize: 
@@ -219,7 +226,6 @@ if queries:
                 if not normalize:
                     df = df.astype(int)
                 st.line_chart(df)
-                # st.dataframe(df)
             else:
                 if normalize:
                     timeline_df = df.groupby('date').mean()
