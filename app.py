@@ -132,6 +132,7 @@ query_terms = tuple(query_terms)
 
 st.sidebar.header('Parameters')
 
+search = st.sidebar.text_input('Limit texts', '')
 queries = st.sidebar.multiselect(
     'Select words',
     query_terms, default='mater'
@@ -164,12 +165,20 @@ if queries:
         df = df.join(dates).dropna()
         df_state = df.copy()
 
+        init_slider_min, init_slider_max = int(dates['date'].min()), int(dates['date'].max())
         slider_min, slider_max = int(df['date'].min()), int(df['date'].max())
-        slider_range = st.sidebar.slider('Date Range', min_value=slider_min, max_value=slider_max, value=(slider_min, slider_max))
+        slider_range = st.sidebar.slider('Date Range', min_value=init_slider_min, max_value=init_slider_max, value=(slider_min, slider_max))
         valid_slider = True
         empty_df = False
-        # slider_min, slider_max = slider_range
-        slider_min_state, slider_max_state = (slider_min, slider_max)
+        slider_min, slider_max = slider_range
+        # slider_min_state, slider_max_state = (slider_min, slider_max)
+        print(search)
+        if len(search) > 0:
+            # df = df[df.index.to_series().str.contains(search)]
+            df['search'] = df.index
+            df['search'] = df['search'].apply(lambda x: x.lower())
+            df = df[df['search'].str.contains(search.lower())]
+            df.pop('search')
         df = df[(df['date'] >= slider_min) & (df['date'] <= slider_max)]
 
         if len(df) < 1:
@@ -189,7 +198,6 @@ if queries:
         if not empty_df:
             date_query_avgs = {query: sum(df[query])/len(df[query]) for query in queries}        
         date_query_inc = {query: count_nonzero(df[query]) for query in queries}
-        # date_num_texts = len(df)
         
         if valid_slider:
             if normalize: 
@@ -230,6 +238,21 @@ if queries:
 
             st.header('Text Data')
             st.dataframe(df.sort_values(by='date'))
+
+            @st.cache
+            def convert_df(df, sort=True):
+                if sort:
+                    df = df.sort_values(by='date')
+                return df.to_csv().encode('utf-8')
+            csv = convert_df(df)
+
+            st.download_button(
+                "Download",
+                csv,
+                f"iter_data_{'-'.join(queries)}_{slider_min}-{slider_max}_{'-'.join(modes_)}_norm-{str(normalize).lower()}.csv",
+                "text/csv",
+                key='download_iter_data'
+                )
 
             st.header('Semantic neighbors')
 
