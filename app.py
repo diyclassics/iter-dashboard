@@ -10,110 +10,110 @@ from sklearn.manifold import TSNE
 import plotly
 import plotly.graph_objs as go
 
-top_n = 5
+# top_n = 5
 
-# @st.cache 
-def append_list(sim_words, words):
+# # @st.cache 
+# def append_list(sim_words, words):
     
-    list_of_words = []
+#     list_of_words = []
     
-    for i in range(len(sim_words)):
+#     for i in range(len(sim_words)):
         
-        sim_words_list = list(sim_words[i])
-        sim_words_list.append(words)
-        sim_words_tuple = tuple(sim_words_list)
-        list_of_words.append(sim_words_tuple)
+#         sim_words_list = list(sim_words[i])
+#         sim_words_list.append(words)
+#         sim_words_tuple = tuple(sim_words_list)
+#         list_of_words.append(sim_words_tuple)
         
-    return list_of_words
+#     return list_of_words
 
-def display_scatterplot_2D(model, user_input=None, words=None, label=None, color_map=None, annotation='On', dim_red = 'PCA', perplexity = 0, learning_rate = 0, iteration = 0, topn=0, sample=10):
+# def display_scatterplot_2D(model, user_input=None, words=None, label=None, color_map=None, annotation='On', dim_red = 'PCA', perplexity = 0, learning_rate = 0, iteration = 0, topn=0, sample=10):
 
-    word_vectors = np.array([model[w] for w in words])
+#     word_vectors = np.array([model[w] for w in words])
 
-    if dim_red == 'PCA':
-        two_dim = PCA(random_state=0).fit_transform(word_vectors)[:,:2]
-    else:
-        two_dim = TSNE(random_state=0, perplexity = perplexity, learning_rate = learning_rate, n_iter = iteration).fit_transform(word_vectors)[:,:2]
+#     if dim_red == 'PCA':
+#         two_dim = PCA(random_state=0).fit_transform(word_vectors)[:,:2]
+#     else:
+#         two_dim = TSNE(random_state=0, perplexity = perplexity, learning_rate = learning_rate, n_iter = iteration).fit_transform(word_vectors)[:,:2]
 
-    data = []
-    count = 0
-    for i in range (len(user_input)):
+#     data = []
+#     count = 0
+#     for i in range (len(user_input)):
 
-                trace = go.Scatter(
-                    x = two_dim[count:count+topn,0], 
-                    y = two_dim[count:count+topn,1],  
-                    text = words[count:count+topn] if annotation == 'On' else '',
-                    name = user_input[i],
-                    textposition = "top center",
-                    textfont_size = 20,
-                    mode = 'markers+text',
-                    marker = {
-                        'size': 15,
-                        'opacity': 0.8,
-                        'color': 2
-                    }
+#                 trace = go.Scatter(
+#                     x = two_dim[count:count+topn,0], 
+#                     y = two_dim[count:count+topn,1],  
+#                     text = words[count:count+topn] if annotation == 'On' else '',
+#                     name = user_input[i],
+#                     textposition = "top center",
+#                     textfont_size = 20,
+#                     mode = 'markers+text',
+#                     marker = {
+#                         'size': 15,
+#                         'opacity': 0.8,
+#                         'color': 2
+#                     }
        
-                )
+#                 )
                
-                data.append(trace)
-                count = count+topn
+#                 data.append(trace)
+#                 count = count+topn
 
-    trace_input = go.Scatter(
-                    x = two_dim[count:,0], 
-                    y = two_dim[count:,1],  
-                    text = words[count:],
-                    name = 'input words',
-                    textposition = "top center",
-                    textfont_size = 20,
-                    mode = 'markers+text',
-                    marker = {
-                        'size': 25,
-                        'opacity': 1,
-                        'color': 'black'
-                    }
-                    )
+#     trace_input = go.Scatter(
+#                     x = two_dim[count:,0], 
+#                     y = two_dim[count:,1],  
+#                     text = words[count:],
+#                     name = 'input words',
+#                     textposition = "top center",
+#                     textfont_size = 20,
+#                     mode = 'markers+text',
+#                     marker = {
+#                         'size': 25,
+#                         'opacity': 1,
+#                         'color': 'black'
+#                     }
+#                     )
 
-    data.append(trace_input)
+#     data.append(trace_input)
     
-# Configure the layout.
-    layout = go.Layout(
-        margin = {'l': 0, 'r': 0, 'b': 0, 't': 0},
-        showlegend=True,
-        hoverlabel=dict(
-            bgcolor="white", 
-            font_size=20, 
-            font_family="Courier New"),
-        legend=dict(
-        x=1,
-        y=0.5,
-        font=dict(
-            family="Courier New",
-            size=25,
-            color="black"
-        )),
-        font = dict(
-            family = " Courier New ",
-            size = 15),
-        autosize = False,
-        width = 1600,
-        height = 800,
-        )
+# # Configure the layout.
+#     layout = go.Layout(
+#         margin = {'l': 0, 'r': 0, 'b': 0, 't': 0},
+#         showlegend=True,
+#         hoverlabel=dict(
+#             bgcolor="white", 
+#             font_size=20, 
+#             font_family="Courier New"),
+#         legend=dict(
+#         x=1,
+#         y=0.5,
+#         font=dict(
+#             family="Courier New",
+#             size=25,
+#             color="black"
+#         )),
+#         font = dict(
+#             family = " Courier New ",
+#             size = 15),
+#         autosize = False,
+#         width = 1600,
+#         height = 800,
+#         )
 
 
-    plot_figure = go.Figure(data = data, layout = layout)
+#     plot_figure = go.Figure(data = data, layout = layout)
 
-    st.plotly_chart(plot_figure)
+#     st.plotly_chart(plot_figure)
 
 # Streamlit app
 st.set_page_config(layout="wide")
 
 st.header('ITER Dashboard')
 
-# @st.cache()
-def get_models():
-    modelfile = 'data/models/allLASLAlemmi-vector-100-nocase-w10-SKIP.bin'
-    model=KeyedVectors.load_word2vec_format(modelfile, binary=True)
-    return model
+# # @st.cache()
+# def get_models():
+#     modelfile = 'data/models/allLASLAlemmi-vector-100-nocase-w10-SKIP.bin'
+#     model=KeyedVectors.load_word2vec_format(modelfile, binary=True)
+#     return model
 
 @st.cache()
 def get_data():
@@ -125,7 +125,7 @@ def get_data():
 
 with st.spinner('Loading data...'):
     df, dates, modes, totals = get_data()
-    model = get_models()
+    # model = get_models()
 
 query_terms = df.columns
 query_terms = tuple(query_terms)
@@ -237,70 +237,70 @@ if queries:
             st.header('Text Data')
             st.dataframe(df.sort_values(by='date'))
 
-            st.header('Semantic neighbors')
+            # st.header('Semantic neighbors')
 
-            result_word = []
-            user_input = queries.copy()
+            # result_word = []
+            # user_input = queries.copy()
 
-            missing_words = [f'*{item}*' for item in user_input if item not in model]
-            user_input = [item for item in user_input if item in model]
+            # missing_words = [f'*{item}*' for item in user_input if item not in model]
+            # user_input = [item for item in user_input if item in model]
 
-            if missing_words:
-                st.markdown(f'NB: {", ".join(missing_words)} do not appear in model vocabulary.')
+            # if missing_words:
+            #     st.markdown(f'NB: {", ".join(missing_words)} do not appear in model vocabulary.')
 
-            if not user_input:
-                st.warning('None of the words selected words appear in the model vocabulary.')
-            else:
+            # if not user_input:
+            #     st.warning('None of the words selected words appear in the model vocabulary.')
+            # else:
 
-                for words in user_input:
-                    sim_words = model.most_similar(words, topn = top_n)
-                    # sim_words = [sim_word for sim_word in sim_words if sim_word[0] not in queries]
+            #     for words in user_input:
+            #         sim_words = model.most_similar(words, topn = top_n)
+            #         # sim_words = [sim_word for sim_word in sim_words if sim_word[0] not in queries]
                     
-                    sim_words = append_list(sim_words, words)
-                    result_word.extend(sim_words)
+            #         sim_words = append_list(sim_words, words)
+            #         result_word.extend(sim_words)
 
-                    similar_word = [word[0] for word in result_word]
-                    similarity = [word[1] for word in result_word] 
-                    similar_word.extend(user_input)
-                    labels = [word[2] for word in result_word]
-                    label_dict = dict([(y,x+1) for x,y in enumerate(set(labels))])
-                    color_map = [label_dict[x] for x in labels]   
+            #         similar_word = [word[0] for word in result_word]
+            #         similarity = [word[1] for word in result_word] 
+            #         similar_word.extend(user_input)
+            #         labels = [word[2] for word in result_word]
+            #         label_dict = dict([(y,x+1) for x,y in enumerate(set(labels))])
+            #         color_map = [label_dict[x] for x in labels]   
 
-                # dim_red = st.sidebar.selectbox('Select dimension reduction method', ('PCA','TSNE')) # TSNE not working correctly
-                dim_red = st.sidebar.selectbox('Select dimension reduction method', ['PCA'])
+            #     # dim_red = st.sidebar.selectbox('Select dimension reduction method', ('PCA','TSNE')) # TSNE not working correctly
+            #     dim_red = st.sidebar.selectbox('Select dimension reduction method', ['PCA'])
 
-                display_scatterplot_2D(model, queries, similar_word, labels, color_map, annotation="On", dim_red=dim_red, perplexity=30, learning_rate=200, iteration=1000, topn=top_n) 
+            #     display_scatterplot_2D(model, queries, similar_word, labels, color_map, annotation="On", dim_red=dim_red, perplexity=30, learning_rate=200, iteration=1000, topn=top_n) 
 
-                def horizontal_bar(word, similarity):
+            #     def horizontal_bar(word, similarity):
                     
-                    similarity = [ round(elem, 2) for elem in similarity ]
+            #         similarity = [ round(elem, 2) for elem in similarity ]
                     
-                    data = go.Bar(
-                            x= similarity,
-                            y= word,
-                            orientation='h',
-                            text = similarity,
-                            marker_color= 4,
-                            textposition='auto')
+            #         data = go.Bar(
+            #                 x= similarity,
+            #                 y= word,
+            #                 orientation='h',
+            #                 text = similarity,
+            #                 marker_color= 4,
+            #                 textposition='auto')
 
-                    layout = go.Layout(
-                            font = dict(size=20),
-                            xaxis = dict(showticklabels=False, automargin=True),
-                            yaxis = dict(showticklabels=True, automargin=True,autorange="reversed"),
-                            margin = dict(t=20, b= 20, r=10)
-                            )
+            #         layout = go.Layout(
+            #                 font = dict(size=20),
+            #                 xaxis = dict(showticklabels=False, automargin=True),
+            #                 yaxis = dict(showticklabels=True, automargin=True,autorange="reversed"),
+            #                 margin = dict(t=20, b= 20, r=10)
+            #                 )
 
-                    plot_figure = go.Figure(data = data, layout = layout)
-                    st.plotly_chart(plot_figure)            
+            #         plot_figure = go.Figure(data = data, layout = layout)
+            #         st.plotly_chart(plot_figure)            
 
-                st.header('The Top 5 Most Similar Words for Each Input')
-                count=0
-                for i in range (len(user_input)):
+            #     st.header('The Top 5 Most Similar Words for Each Input')
+            #     count=0
+            #     for i in range (len(user_input)):
                     
-                    st.write('The most similar words from '+str(user_input[i])+' are:')
-                    horizontal_bar(similar_word[count:count+5], similarity[count:count+5])
+            #         st.write('The most similar words from '+str(user_input[i])+' are:')
+            #         horizontal_bar(similar_word[count:count+5], similarity[count:count+5])
                     
-                    count = count+top_n
+            #         count = count+top_n
 
     else:
         'Please select at least one mode from the sidebar.'
