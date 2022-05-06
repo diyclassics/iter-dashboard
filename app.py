@@ -104,11 +104,6 @@ def display_scatterplot_2D(model, user_input=None, words=None, label=None, color
 
     st.plotly_chart(plot_figure)
 
-
-
-
- 
-
 # Streamlit app
 st.set_page_config(layout="wide")
 
@@ -148,13 +143,16 @@ if queries:
     if queries and modes_:
         normalize = st.sidebar.checkbox('Normalize?', value=False)    
         combine_mode = st.sidebar.checkbox('Combine mode?', value=False)
-        slider_min, slider_max = int(dates['date'].min()), 770
-        slider_range = st.sidebar.slider('Date Range', value=[slider_min, slider_max])
-        valid_slider = True
-        slider_min, slider_max = slider_range
+        # slider_min, slider_max = int(dates['date'].min()), int(dates['date'].max())
+        # slider_range = st.sidebar.slider('Date Range', value=[slider_min, slider_max])
+        # valid_slider = True
+        # empty_df = False
+        # slider_min, slider_max = slider_range
 
         if normalize:
-            df = df.apply(lambda x: x / totals['total'] * 1000)
+            df = df.join(totals).dropna()
+            df = df.apply(lambda x: x / df['total'], axis=0)
+            df.pop('total')
 
         df = df[queries]
         df = df.loc[~(df==0).all(axis=1)]
@@ -165,16 +163,21 @@ if queries:
 
         df = df.join(dates).dropna()
         df_state = df.copy()
-        slider_min_state, slider_max_state = slider_min, slider_max
+
+        slider_min, slider_max = int(df['date'].min()), int(df['date'].max())
+        slider_range = st.sidebar.slider('Date Range', min_value=slider_min, max_value=slider_max, value=(slider_min, slider_max))
+        valid_slider = True
+        empty_df = False
+        # slider_min, slider_max = slider_range
+        slider_min_state, slider_max_state = (slider_min, slider_max)
         df = df[(df['date'] >= slider_min) & (df['date'] <= slider_max)]
+
         if len(df) < 1:
             st.warning('There are no entries for these queries in this date range. Select a different range')
             empty_df = True
             df = df_state
             slider_min, slider_max = slider_min_state, slider_max_state
             valid_slider = False
-        else:
-            empty_df = False
 
         dates = df.pop('date')
 
@@ -186,10 +189,11 @@ if queries:
         if not empty_df:
             date_query_avgs = {query: sum(df[query])/len(df[query]) for query in queries}        
         date_query_inc = {query: count_nonzero(df[query]) for query in queries}
-        date_num_texts = len(df)
+        # date_num_texts = len(df)
         
         if valid_slider:
             if normalize: 
+                pass
                 for k in date_query_avgs.keys():
                     st.markdown(f'*{k}* appears **{round(date_query_avgs[k], 4)}** times per 1000 words in {date_query_inc[k]} texts between {slider_min} and {slider_max}.') 
                 
@@ -234,62 +238,63 @@ if queries:
 
             missing_words = [f'*{item}*' for item in user_input if item not in model]
             user_input = [item for item in user_input if item in model]
-            
-
-            print(missing_words)
 
             if missing_words:
                 st.markdown(f'NB: {", ".join(missing_words)} do not appear in model vocabulary.')
 
-            for words in user_input:
-                sim_words = model.most_similar(words, topn = top_n)
-                # sim_words = [sim_word for sim_word in sim_words if sim_word[0] not in queries]
-                
-                sim_words = append_list(sim_words, words)
-                result_word.extend(sim_words)
+            if not user_input:
+                st.warning('None of the words selected words appear in the model vocabulary.')
+            else:
 
-                similar_word = [word[0] for word in result_word]
-                similarity = [word[1] for word in result_word] 
-                similar_word.extend(user_input)
-                labels = [word[2] for word in result_word]
-                label_dict = dict([(y,x+1) for x,y in enumerate(set(labels))])
-                color_map = [label_dict[x] for x in labels]   
+                for words in user_input:
+                    sim_words = model.most_similar(words, topn = top_n)
+                    # sim_words = [sim_word for sim_word in sim_words if sim_word[0] not in queries]
+                    
+                    sim_words = append_list(sim_words, words)
+                    result_word.extend(sim_words)
 
-            # dim_red = st.sidebar.selectbox('Select dimension reduction method', ('PCA','TSNE')) # TSNE not working correctly
-            dim_red = st.sidebar.selectbox('Select dimension reduction method', ['PCA'])
+                    similar_word = [word[0] for word in result_word]
+                    similarity = [word[1] for word in result_word] 
+                    similar_word.extend(user_input)
+                    labels = [word[2] for word in result_word]
+                    label_dict = dict([(y,x+1) for x,y in enumerate(set(labels))])
+                    color_map = [label_dict[x] for x in labels]   
 
-            display_scatterplot_2D(model, queries, similar_word,labels, color_map, annotation="On", dim_red=dim_red, perplexity=30, learning_rate=200, iteration=1000, topn=top_n) 
+                # dim_red = st.sidebar.selectbox('Select dimension reduction method', ('PCA','TSNE')) # TSNE not working correctly
+                dim_red = st.sidebar.selectbox('Select dimension reduction method', ['PCA'])
 
-            def horizontal_bar(word, similarity):
-                
-                similarity = [ round(elem, 2) for elem in similarity ]
-                
-                data = go.Bar(
-                        x= similarity,
-                        y= word,
-                        orientation='h',
-                        text = similarity,
-                        marker_color= 4,
-                        textposition='auto')
+                display_scatterplot_2D(model, queries, similar_word, labels, color_map, annotation="On", dim_red=dim_red, perplexity=30, learning_rate=200, iteration=1000, topn=top_n) 
 
-                layout = go.Layout(
-                        font = dict(size=20),
-                        xaxis = dict(showticklabels=False, automargin=True),
-                        yaxis = dict(showticklabels=True, automargin=True,autorange="reversed"),
-                        margin = dict(t=20, b= 20, r=10)
-                        )
+                def horizontal_bar(word, similarity):
+                    
+                    similarity = [ round(elem, 2) for elem in similarity ]
+                    
+                    data = go.Bar(
+                            x= similarity,
+                            y= word,
+                            orientation='h',
+                            text = similarity,
+                            marker_color= 4,
+                            textposition='auto')
 
-                plot_figure = go.Figure(data = data, layout = layout)
-                st.plotly_chart(plot_figure)            
+                    layout = go.Layout(
+                            font = dict(size=20),
+                            xaxis = dict(showticklabels=False, automargin=True),
+                            yaxis = dict(showticklabels=True, automargin=True,autorange="reversed"),
+                            margin = dict(t=20, b= 20, r=10)
+                            )
 
-            st.header('The Top 5 Most Similar Words for Each Input')
-            count=0
-            for i in range (len(user_input)):
-                
-                st.write('The most similar words from '+str(user_input[i])+' are:')
-                horizontal_bar(similar_word[count:count+5], similarity[count:count+5])
-                
-                count = count+top_n
+                    plot_figure = go.Figure(data = data, layout = layout)
+                    st.plotly_chart(plot_figure)            
+
+                st.header('The Top 5 Most Similar Words for Each Input')
+                count=0
+                for i in range (len(user_input)):
+                    
+                    st.write('The most similar words from '+str(user_input[i])+' are:')
+                    horizontal_bar(similar_word[count:count+5], similarity[count:count+5])
+                    
+                    count = count+top_n
 
     else:
         'Please select at least one mode from the sidebar.'

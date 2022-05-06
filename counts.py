@@ -6,7 +6,6 @@ from latintools import preprocess
 import pickle
 
 # Define vocabulary
-# vocabulary = ['pater', 'mater', 'filius', 'filia', 'auunculus', 'patruus']
 term_data = pickle.load(open('data/output/kinship_terms.p', 'rb'))
 terms, genders = zip(*term_data.items())
 terms = [preprocess(term) for term in terms]
@@ -15,16 +14,16 @@ terms = [preprocess(term) for term in terms]
 T = LatinTesseraeCorpusReader()
 
 # Get texts
-docs = [next(T.texts(file, preprocess=preprocess)) for file in T.fileids()]
+# docs = [next(T.texts(file, preprocess=preprocess)) for file in T.fileids()]
 
 # Get metadata
-dates = [T.metadata('date', file) for file in T.fileids()]
-df = pd.DataFrame(dates, columns=['date'], index=T.fileids())
-df.to_csv('data/output/dates.tsv', sep='\t')
+# dates = [T.metadata('date', file) for file in T.fileids()]
+# df = pd.DataFrame(dates, columns=['date'], index=T.fileids())
+# df.to_csv('data/output/dates.tsv', sep='\t')
 
-modes = [T.metadata('mode', file) for file in T.fileids()]
-df = pd.DataFrame(modes, columns=['mode'], index=T.fileids())
-df.to_csv('data/output/modes.tsv', sep='\t')
+# modes = [T.metadata('mode', file) for file in T.fileids()]
+# df = pd.DataFrame(modes, columns=['mode'], index=T.fileids())
+# df.to_csv('data/output/modes.tsv', sep='\t')
 
 # Get approx counts
 # TODO: Get true counts
