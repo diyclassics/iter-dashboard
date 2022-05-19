@@ -1,3 +1,0 @@
--e git+https://github.com/diyclassics/cltk_readers.git#egg=cltk_readers
-streamlit==1.8.1
-watchdog==2.1.7
